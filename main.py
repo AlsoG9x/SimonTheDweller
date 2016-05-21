@@ -12,11 +12,14 @@ ypos = 0
 xpos = 0
 bg=0x998877
 
-#char = sprite_sheet(16,'sprites.png',pos=(16,0)) 
-#charRect = char.get_rect()
+def spritesheet(file,i,j): #i and j are the location from 0 to N, e.g.: simon is i=4 (5th row) and j=2 (3rd vertial column)
 
-char = pygame.image.load("char.bmp")
-charRect = char.get_rect()
+        sheet = pygame.image.load(file)
+        sprite0 = sheet.subsurface(i*32,j*32,32,32)
+        sprite0rect = sprite0.get_rect()
+        return sprite0,sprite0rect
+
+simon, simonRect = spritesheet('sprites.png',4,2)
 
 while 1:
     for event in pygame.event.get():
@@ -27,13 +30,13 @@ while 1:
     if key[pygame.K_RIGHT]:xpos+=speed
     if key[pygame.K_LEFT]:xpos-=speed
 
-    charRect.left=xpos
-    charRect.top=ypos
+    simonRect.left=xpos
+    simonRect.top=ypos
 
     print 'xpos:{} ypos:{}'.format(xpos,ypos)
 
     screen.fill(bg)
-    screen.blit(char,charRect)
+    screen.blit(simon,simonRect)
     pygame.display.flip()
     pygame.time.delay(1000/50)
  
