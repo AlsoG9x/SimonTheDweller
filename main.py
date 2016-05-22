@@ -16,7 +16,7 @@ screen =  pygame.display.set_mode(size)
 
 #Sprite Sheet function
 def spritesheet(file,i,j):
-#i and j are the location from 0 to N, e.g.: simon is i=4 (5th row) and j=2 (3rd vertial column)
+#i and j are the location from 0 to N, e.g.: simon is i=4 (5th row) and j=2 (3rd column)
         sheet = pygame.image.load(file)
         sprite0 = sheet.subsurface(i*32,j*32,32,32)
         sprite0rect = sprite0.get_rect()
