@@ -1,65 +1,75 @@
-import pygame,sys,os
+import pygame, sys
 from pygame.locals import *
 
-""" CONSTANTS """
-size = width,height= 320,240
-speed = 4
-ypos = 32
-xpos = 32
-bg=0x998877
+#Variables
+PlayerPos = [64,64]
+WindowSize = [640,640]
+PlayerSpeed = 32 #Player Speed in pixel per fps
+MoveCD = 100 #Cooldown before the Player is able to move again in millisecond
+SpriteSheet = 'sprites.png'
 
-os.environ["SDL_VIDEO_CENTERED"] = "1"
+#Init game and screen (window)
 pygame.init()
-
-screen =  pygame.display.set_mode(size)
-
+screen = pygame.display.set_mode(WindowSize)
 
 #Sprite Sheet function
-def spritesheet(file,i,j):
-#i and j are the location from 0 to N, e.g.: simon is i=4 (5th row) and j=2 (3rd column)
-        sheet = pygame.image.load(file)
-        sprite0 = sheet.subsurface(i*32,j*32,32,32)
-        sprite0rect = sprite0.get_rect()
-        return sprite0,sprite0rect
+def Spritesheet(file,i,j,x,y):
+    sheet = pygame.image.load(file)
+    sprite = sheet.subsurface(i*32,j*32,x,y)
+    spriteRect = sprite.get_rect()
+    return sprite,spriteRect
+    #i and j are the location from 0 to N, e.g.: simon is i=4 (5th row) and j=2 (3rd column). x and y are the size we want to select e.g.: 32x32 => x=32 y )32
 
-#Importing sprites from the Spritesheet
-simon, simonRect = spritesheet('sprites.png',4,2)
-block, blockRect = spritesheet('sprites.png',39,17)
+#Player function
+def Player(sprite,spriteRect,posX,posY):
+    spriteRect.left = posX
+    spriteRect.top = posY
+    PlayerPos = [posX, posY]
+    screen.blit(sprite,spriteRect)
+    #print 'posXY: {} {}'.format(posX, posY)
+    #print 'playerpos: {} {}'.format(PlayerPos[0], PlayerPos[1])
 
+#Make the screen display
+def Display(fps):
+    pygame.display.update()
+    pygame.time.delay(1000/fps)
 
-while 1:
+#Move Position by a certain Speed with a CD
+def Move(Pos,Speed,MoveCD):
+        Pos += Speed
+        pygame.time.delay(MoveCD)
+        return Pos
+
+#Import Sprites
+Simon, SimonRect = Spritesheet(SpriteSheet,4,2,32,32)
+Level1, Level1Rect = Spritesheet('Level1.png',0,0,640,640)
+
+while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
+
+    #Player Mouvement
+    GameKey = pygame.key.get_pressed()
     
-    #Player Mouvement Inputs
-    key = pygame.key.get_pressed()
-    if key[pygame.K_UP]|key[pygame.K_z]:ypos-=speed
-    if key[pygame.K_DOWN]|key[pygame.K_s]:ypos+=speed
-    if key[pygame.K_RIGHT]|key[pygame.K_d]:xpos+=speed
-    if key[pygame.K_LEFT]|key[pygame.K_q]:xpos-=speed
+    if GameKey[pygame.K_DOWN]:
+        PlayerPos[1] = Move(PlayerPos[1], PlayerSpeed, MoveCD)
+    if GameKey[pygame.K_UP]:
+        PlayerPos[1] = Move(PlayerPos[1], -PlayerSpeed, MoveCD)
+    if GameKey[pygame.K_RIGHT]:
+        PlayerPos[0] = Move(PlayerPos[0], PlayerSpeed, MoveCD)
+    if GameKey[pygame.K_LEFT]:
+        PlayerPos[0] = Move(PlayerPos[0], -PlayerSpeed, MoveCD)
+
+    #World Boundaries Check
+    while (PlayerPos[0] > WindowSize[0] - 32):
+        PlayerPos[0] -= PlayerSpeed
+    while (PlayerPos[0] < 0):
+        PlayerPos[0] += PlayerSpeed
+    while (PlayerPos[1] > WindowSize[1] - 32):
+        PlayerPos[1] -= PlayerSpeed
+    while (PlayerPos[1] < 0):
+        PlayerPos[1] += PlayerSpeed
     
-    #World Boundaries
-    while (xpos > width-32):
-        xpos -= 1
-    while (xpos < 0):
-        xpos += +1
-    
-    while (ypos > height-32):
-        ypos -= 1
-    while (ypos < 0):
-        ypos += 1
-    
-    #Set the player postion
-    simonRect.left=xpos
-    simonRect.top=ypos
-    
-    #Debug line
-    print 'xpos:{} ypos:{}'.format(xpos,ypos)
-    
-    #Display and update everything
-    screen.fill(bg)
-    screen.blit(simon,simonRect)
-    screen.blit(block,blockRect)
-    pygame.display.update()
-    pygame.time.delay(1000/50)
- 
+    screen.blit(Level1,Level1Rect)
+    Player(Simon, SimonRect, PlayerPos[0], PlayerPos[1])
+    Display(60)
