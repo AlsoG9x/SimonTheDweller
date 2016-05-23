@@ -6,7 +6,6 @@ PlayerPos = [64,64]
 WindowSize = [640,640]
 PlayerSpeed = 32 #Player Speed in pixel per fps
 MoveCD = 100 #Cooldown before the Player is able to move again in millisecond
-SpriteSheet = 'sprites.png'
 
 #Init game and screen (window)
 pygame.init()
@@ -41,8 +40,8 @@ def Move(Pos,Speed,MoveCD):
         return Pos
 
 #Import Sprites
-Simon, SimonRect = Spritesheet(SpriteSheet,4,2,32,32)
-Level1, Level1Rect = Spritesheet('Level1.png',0,0,640,640)
+Simon, SimonRect = Spritesheet('images/sprites.png',4,2,32,32)
+Level1, Level1Rect = Spritesheet('images/Level1.png',0,0,640,640)
 
 while True:
     for event in pygame.event.get():
