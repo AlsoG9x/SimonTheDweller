@@ -39,9 +39,56 @@ def Move(Pos,Speed,MoveCD):
         pygame.time.delay(MoveCD)
         return Pos
 
+def Background(sprite,spriteRect):
+    for x in range(0,WindowSize[0]/32):
+        for y in range(0,WindowSize[1]/32):
+            spriteRect.top = y*32
+            screen.blit(sprite,spriteRect)
+        spriteRect.left = x*32
+        screen.blit(sprite,spriteRect)
+
+def Layer(sprite,spriteRect,blueprint,char):
+    xL = 0
+    yL = 0
+    for i in blueprint:
+        for j in i:
+            if xL == WindowSize[0]:
+                xL = 0
+                yL += 32
+            if j == char:
+                spriteRect.left = xL
+                spriteRect.top = yL
+                screen.blit(sprite,spriteRect)
+            xL += 32
+
 #Import Sprites
 Simon, SimonRect = Spritesheet('images/sprites.png',4,2,32,32)
-Level1, Level1Rect = Spritesheet('images/Level1.png',0,0,640,640)
+Wall, WallRect = Spritesheet('images/sprites.png',39,17,32,32)
+Ground, GroundRect = Spritesheet('images/sprites.png',41,12,32,32) 
+
+Level1 = [
+"WWWWWWWWWWWWWWWWWWWW"
+"W......W..W..W.....W"
+"W...WWWW...........W"
+"W...W..............W"
+"W...W..............W"
+"W...W..............W"
+"W...W..............W"
+"W..................W"
+"WWWWW..............W"
+"W..................W"
+"W..................W"
+"W..................W"
+"W..................W"
+"W..................W"
+"W..................W"
+"W..................W"
+"W..................W"
+"W..................W"
+"W..................W"
+"W..................W"
+"WWWWWWWWWWWWWWWWWWWW"
+]
 
 while True:
     for event in pygame.event.get():
@@ -69,6 +116,7 @@ while True:
     while (PlayerPos[1] < 0):
         PlayerPos[1] += PlayerSpeed
     
-    screen.blit(Level1,Level1Rect)
+    Background(Ground,GroundRect)
+    Layer(Wall,WallRect, Level1,"W")
     Player(Simon, SimonRect, PlayerPos[0], PlayerPos[1])
     Display(60)
