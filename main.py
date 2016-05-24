@@ -3,9 +3,12 @@ from pygame.locals import *
 
 #Variables
 PlayerPos = [64,64]
-WindowSize = [640,640]
+WindowSize = [320,320]
+BackgroundSize = [640, 640]
 PlayerSpeed = 32 #Player Speed in pixel per fps
 MoveCD = 100 #Cooldown before the Player is able to move again in millisecond
+CameraX = 0
+CameraY = 0
 
 #Init game and screen (window)
 pygame.init()
@@ -24,7 +27,7 @@ def Player(sprite,spriteRect,posX,posY):
     spriteRect.left = posX
     spriteRect.top = posY
     PlayerPos = [posX, posY]
-    screen.blit(sprite,spriteRect)
+    screen.blit(sprite ,(posX - CameraX, posY - CameraY))
     #print 'posXY: {} {}'.format(posX, posY)
     #print 'playerpos: {} {}'.format(PlayerPos[0], PlayerPos[1])
 
@@ -40,25 +43,25 @@ def Move(Pos,Speed,MoveCD):
         return Pos
 
 def Background(sprite,spriteRect):
-    for x in range(0,WindowSize[0]/32):
-        for y in range(0,WindowSize[1]/32):
+    for x in range(0,BackgroundSize[0]/32):
+        for y in range(0,BackgroundSize[1]/32):
             spriteRect.top = y*32
-            screen.blit(sprite,spriteRect)
+            screen.blit(sprite,(x*32 - CameraX, y*32 - CameraY))
         spriteRect.left = x*32
-        screen.blit(sprite,spriteRect)
+        screen.blit(sprite,(x*32 - CameraX, y*32 - CameraY))
 
 def Layer(sprite,spriteRect,blueprint,char):
     xL = 0
     yL = 0
     for i in blueprint:
         for j in i:
-            if xL == WindowSize[0]:
+            if xL == BackgroundSize[0]:
                 xL = 0
                 yL += 32
             if j == char:
                 spriteRect.left = xL
                 spriteRect.top = yL
-                screen.blit(sprite,spriteRect)
+                screen.blit(sprite,(xL - CameraX, yL - CameraY))
             xL += 32
 
 #Import Sprites
@@ -68,23 +71,22 @@ Ground, GroundRect = Spritesheet('images/sprites.png',41,12,32,32)
 
 Level1 = [
 "WWWWWWWWWWWWWWWWWWWW"
-"W......W..W..W.....W"
-"W...WWWW...........W"
-"W...W..............W"
-"W...W..............W"
-"W...W..............W"
-"W...W..............W"
-"W..................W"
-"WWWWW..............W"
-"W..................W"
-"W..................W"
-"W..................W"
+"W.....WW...........W"
+"W....WW............W"
+"W...WW...WWWW......W"
+"W...W.......WW.....W"
+"W...W........W.....W"
+"W...WWWWWW...W.....W"
+"W...........WW.....W"
+"WWWW......WWW......W"
+"W..WWWWWWWW........W"
 "W..................W"
 "W..................W"
-"W..................W"
+"W...WWWWWWWWWWWWWWWW"
 "W..................W"
 "W..................W"
 "W..................W"
+"WWWWWWWWWWWWW......W"
 "W..................W"
 "W..................W"
 "WWWWWWWWWWWWWWWWWWWW"
@@ -105,17 +107,34 @@ while True:
         PlayerPos[0] = Move(PlayerPos[0], PlayerSpeed, MoveCD)
     if GameKey[pygame.K_LEFT]:
         PlayerPos[0] = Move(PlayerPos[0], -PlayerSpeed, MoveCD)
-
+   
+    #if ((PlayerPos[0] < BackgroundSize[0] - 160)&(PlayerPos[0] > 160)):
+    CameraX = PlayerPos[0] - 128
+    #if ((PlayerPos[1] < BackgroundSize[1] - 160)&(PlayerPos[1] > 160)):
+    CameraY = PlayerPos[1] - 128
+    
+    """ #Manual Camera Mouvements
+    if GameKey[pygame.K_s]:
+        CameraY = Move(CameraY, PlayerSpeed, MoveCD)
+    if GameKey[pygame.K_z]:
+        CameraY = Move(CameraY, -PlayerSpeed, MoveCD)
+    if GameKey[pygame.K_d]:
+        CameraX = Move(CameraX, PlayerSpeed, MoveCD)
+    if GameKey[pygame.K_q]:
+        CameraX = Move(CameraX, -PlayerSpeed, MoveCD)
+    """
+    
     #World Boundaries Check
-    while (PlayerPos[0] > WindowSize[0] - 32):
+    while (PlayerPos[0] > BackgroundSize[0] - 32):
         PlayerPos[0] -= PlayerSpeed
     while (PlayerPos[0] < 0):
         PlayerPos[0] += PlayerSpeed
-    while (PlayerPos[1] > WindowSize[1] - 32):
+    while (PlayerPos[1] > BackgroundSize[1] - 32):
         PlayerPos[1] -= PlayerSpeed
     while (PlayerPos[1] < 0):
         PlayerPos[1] += PlayerSpeed
-    
+     
+    screen.fill(0x000000)
     Background(Ground,GroundRect)
     Layer(Wall,WallRect, Level1,"W")
     Player(Simon, SimonRect, PlayerPos[0], PlayerPos[1])
