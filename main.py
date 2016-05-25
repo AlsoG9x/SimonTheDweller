@@ -5,17 +5,16 @@ from pygame.locals import *
 PlayerPos = [64,64]
 WindowSize = [320,320]
 BackgroundSize = [640, 640]
+CameraPos = [0,0]
 PlayerSpeed = 32 #Player Speed in pixel per fps
 MoveCD = 100 #Cooldown before the Player is able to move again in millisecond
-CameraX = 0
-CameraY = 0
 
 #Init game and screen (window)
 pygame.init()
 screen = pygame.display.set_mode(WindowSize)
 
 #Sprite Sheet function
-def Spritesheet(file,i,j,x,y):
+def Spritesheet(file,i,j,x=32,y=32):
     sheet = pygame.image.load(file)
     sprite = sheet.subsurface(i*32,j*32,x,y)
     spriteRect = sprite.get_rect()
@@ -27,48 +26,69 @@ def Player(sprite,spriteRect,posX,posY):
     spriteRect.left = posX
     spriteRect.top = posY
     PlayerPos = [posX, posY]
-    screen.blit(sprite ,(posX - CameraX, posY - CameraY))
+    screen.blit(sprite ,(posX - CameraPos[0], posY - CameraPos[1]))
     #print 'posXY: {} {}'.format(posX, posY)
     #print 'playerpos: {} {}'.format(PlayerPos[0], PlayerPos[1])
 
 #Make the screen display
-def Display(fps):
+def Display(fps=60):
     pygame.display.update()
     pygame.time.delay(1000/fps)
 
 #Move Position by a certain Speed with a CD
-def Move(Pos,Speed,MoveCD):
+def Move(Pos, Speed, MoveCD=MoveCD):
         Pos += Speed
         pygame.time.delay(MoveCD)
         return Pos
 
+#Push the player back in the opposite direction of the key pressed. e.g: Player press down and get pushed upward.
+def WallCollision():
+    if GameKey[pygame.K_DOWN]:
+        PlayerPos[1] -= PlayerSpeed
+    if GameKey[pygame.K_UP]:
+        PlayerPos[1] += PlayerSpeed
+    if GameKey[pygame.K_RIGHT]:
+        PlayerPos[0] -= PlayerSpeed
+    if GameKey[pygame.K_LEFT]:
+        PlayerPos[0] += PlayerSpeed
+
+#Create a Background that fills the Room
 def Background(sprite,spriteRect):
     for x in range(0,BackgroundSize[0]/32):
         for y in range(0,BackgroundSize[1]/32):
             spriteRect.top = y*32
-            screen.blit(sprite,(x*32 - CameraX, y*32 - CameraY))
+            screen.blit(sprite,(x*32 - CameraPos[0], y*32 - CameraPos[1]))
         spriteRect.left = x*32
-        screen.blit(sprite,(x*32 - CameraX, y*32 - CameraY))
+        screen.blit(sprite,(x*32 - CameraPos[0], y*32 - CameraPos[1]))
 
-def Layer(sprite,spriteRect,blueprint,char):
+#Create a layer from the blueprint, can give col argument a non-"yes" value to ignore collsions, can give toCall a non-"WallCollision" value to call an other function
+def Layer(sprite,spriteRect,blueprint,char,col='yes',toCall=WallCollision):
     xL = 0
     yL = 0
     for i in blueprint:
         for j in i:
+            #End of the Row : set xL back to 0
             if xL == BackgroundSize[0]:
                 xL = 0
                 yL += 32
+            
             if j == char:
                 spriteRect.left = xL
                 spriteRect.top = yL
-                screen.blit(sprite,(xL - CameraX, yL - CameraY))
+                
+                if (col == 'yes') & (PlayerPos[0] == xL) & (PlayerPos[1]  == yL):
+                    toCall()
+
+                screen.blit(sprite,(xL - CameraPos[0], yL - CameraPos[1]))
             xL += 32
 
 #Import Sprites
-Simon, SimonRect = Spritesheet('images/sprites.png',4,2,32,32)
-Wall, WallRect = Spritesheet('images/sprites.png',39,17,32,32)
-Ground, GroundRect = Spritesheet('images/sprites.png',41,12,32,32) 
+Simon, SimonRect = Spritesheet('images/sprites.png',4,2)
+Wall, WallRect = Spritesheet('images/sprites.png',39,17)
+Ground, GroundRect = Spritesheet('images/sprites.png',41,12) 
 
+#The Level 1 Map blueprint: W = Wall, . = nothing
+#The Array must be of BackgroundSize[0]/32 x BackgroundSize[1]/32, here: 20x20
 Level1 = [
 "WWWWWWWWWWWWWWWWWWWW"
 "W.....WW...........W"
@@ -100,28 +120,26 @@ while True:
     GameKey = pygame.key.get_pressed()
     
     if GameKey[pygame.K_DOWN]:
-        PlayerPos[1] = Move(PlayerPos[1], PlayerSpeed, MoveCD)
+        PlayerPos[1] = Move(PlayerPos[1], PlayerSpeed)
     if GameKey[pygame.K_UP]:
-        PlayerPos[1] = Move(PlayerPos[1], -PlayerSpeed, MoveCD)
+        PlayerPos[1] = Move(PlayerPos[1], -PlayerSpeed)
     if GameKey[pygame.K_RIGHT]:
-        PlayerPos[0] = Move(PlayerPos[0], PlayerSpeed, MoveCD)
+        PlayerPos[0] = Move(PlayerPos[0], PlayerSpeed)
     if GameKey[pygame.K_LEFT]:
-        PlayerPos[0] = Move(PlayerPos[0], -PlayerSpeed, MoveCD)
+        PlayerPos[0] = Move(PlayerPos[0], -PlayerSpeed)
    
-    #if ((PlayerPos[0] < BackgroundSize[0] - 160)&(PlayerPos[0] > 160)):
-    CameraX = PlayerPos[0] - 128
-    #if ((PlayerPos[1] < BackgroundSize[1] - 160)&(PlayerPos[1] > 160)):
-    CameraY = PlayerPos[1] - 128
+    CameraPos[0] = PlayerPos[0] - 128
+    CameraPos[1] = PlayerPos[1] - 128
     
     """ #Manual Camera Mouvements
     if GameKey[pygame.K_s]:
-        CameraY = Move(CameraY, PlayerSpeed, MoveCD)
+        CameraPos[1] = Move(CameraY, PlayerSpeed)
     if GameKey[pygame.K_z]:
-        CameraY = Move(CameraY, -PlayerSpeed, MoveCD)
+        CameraPos[1] = Move(CameraY, -PlayerSpeed)
     if GameKey[pygame.K_d]:
-        CameraX = Move(CameraX, PlayerSpeed, MoveCD)
+        CameraPos[0] = Move(CameraX, PlayerSpeed)
     if GameKey[pygame.K_q]:
-        CameraX = Move(CameraX, -PlayerSpeed, MoveCD)
+        CameraPos[0] = Move(CameraX, -PlayerSpeed)
     """
     
     #World Boundaries Check
@@ -133,9 +151,10 @@ while True:
         PlayerPos[1] -= PlayerSpeed
     while (PlayerPos[1] < 0):
         PlayerPos[1] += PlayerSpeed
-     
+   
+    # print "DEBUG"
     screen.fill(0x000000)
     Background(Ground,GroundRect)
-    Layer(Wall,WallRect, Level1,"W")
+    Layer(Wall,WallRect, Level1, "W")
     Player(Simon, SimonRect, PlayerPos[0], PlayerPos[1])
-    Display(60)
+    Display()
