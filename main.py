@@ -8,6 +8,8 @@ BackgroundSize = [640, 640]
 CameraPos = [0,0]
 PlayerSpeed = 32 #Player Speed in pixel per fps
 MoveCD = 100 #Cooldown before the Player is able to move again in millisecond
+PlayerRotation = 0
+Rot = 0
 
 #Init game and screen (window)
 pygame.init()
@@ -82,8 +84,16 @@ def Layer(sprite,spriteRect,blueprint,char,col='yes',toCall=WallCollision):
                 screen.blit(sprite,(xL - CameraPos[0], yL - CameraPos[1]))
             xL += 32
 
+def Rotation(WantedDeg,RotationValue):
+    if RotationValue != WantedDeg:
+        RotAdd = WantedDeg - RotationValue
+        if RotationValue < WantedDeg:
+            return RotAdd
+        else:
+            return -RotAdd
+
 #Import Sprites
-Simon, SimonRect = Spritesheet('images/sprites.png',4,2)
+Simon, SimonRect = Spritesheet('images/hero.png',0,0)
 Wall, WallRect = Spritesheet('images/sprites.png',39,17)
 Ground, GroundRect = Spritesheet('images/sprites.png',41,12) 
 
@@ -116,18 +126,38 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
 
-    #Player Mouvement
+    #Player Mouvement and sprite rotation
     GameKey = pygame.key.get_pressed()
     
+    #if rot == 360:
+    #    rot = 0
+
     if GameKey[pygame.K_DOWN]:
         PlayerPos[1] = Move(PlayerPos[1], PlayerSpeed)
+        if PlayerRotation != 180:
+            Simon = pygame.transform.rotate(Simon, Rotation(180, PlayerRotation))
+            PlayerRotation = 180
+    
     if GameKey[pygame.K_UP]:
         PlayerPos[1] = Move(PlayerPos[1], -PlayerSpeed)
+        if PlayerRotation != 0:
+            Simon = pygame.transform.rotate(Simon, Rotation(0, PlayerRotation))
+            PlayerRotation = 0
+
     if GameKey[pygame.K_RIGHT]:
         PlayerPos[0] = Move(PlayerPos[0], PlayerSpeed)
+        if PlayerRotation != 90:
+            Simon = pygame.transform.rotate(Simon, Rotation(90, PlayerRotation))
+            PlayerRotation = 90
+
     if GameKey[pygame.K_LEFT]:
         PlayerPos[0] = Move(PlayerPos[0], -PlayerSpeed)
-   
+        if PlayerRotation != 270:
+            Simon = pygame.transform.rotate(Simon, Rotation(270, PlayerRotation))
+            PlayerRotation = 270
+
+    #print "After Mouvement", PlayerRotation  
+
     CameraPos[0] = PlayerPos[0] - 128
     CameraPos[1] = PlayerPos[1] - 128
     
