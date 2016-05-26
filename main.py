@@ -54,15 +54,6 @@ def WallCollision():
     if GameKey[pygame.K_LEFT]:
         PlayerPos[0] += PlayerSpeed
 
-#Create a Background that fills the Room
-def Background(sprite,spriteRect):
-    for x in range(0,BackgroundSize[0]/32):
-        for y in range(0,BackgroundSize[1]/32):
-            spriteRect.top = y*32
-            screen.blit(sprite,(x*32 - CameraPos[0], y*32 - CameraPos[1]))
-        spriteRect.left = x*32
-        screen.blit(sprite,(x*32 - CameraPos[0], y*32 - CameraPos[1]))
-
 #Create a layer from the blueprint, can give col argument a non-"yes" value to ignore collsions, can give toCall a non-"WallCollision" value to call an other function
 def Layer(sprite,spriteRect,blueprint,char,col='yes',toCall=WallCollision):
     xL = 0
@@ -96,9 +87,34 @@ def Rotation(WantedDeg,RotationValue):
 Simon, SimonRect = Spritesheet('images/hero.png',0,0)
 Wall, WallRect = Spritesheet('images/sprites.png',39,17)
 Ground, GroundRect = Spritesheet('images/sprites.png',41,12) 
+Ground2, Ground2Rect = Spritesheet('images/sprites.png',42,12)
 
 #The Level 1 Map blueprint: W = Wall, . = nothing
 #The Array must be of BackgroundSize[0]/32 x BackgroundSize[1]/32, here: 20x20
+
+Background = [
+"11121212121212121212"
+"21212122121112121212"
+"12121211121112111211"
+"11121211121112111212"
+"11211121111212212122"
+"12121112111211121112"
+"21112112121211121121"
+"12122111212112121112"
+"11211121112111121121"
+"11121112111121121121"
+"11121111121111211211"
+"11112111211122122221"
+"11212121221121121212"
+"12122122211121212212"
+"12121112121112121221"
+"12121211111212121211"
+"12121221121212211121"
+"11211122111212111211"
+"11211212111211121121"
+"11211121122222112211"
+]
+
 Level1 = [
 "WWWWWWWWWWWWWWWWWWWW"
 "W.....WW...........W"
@@ -184,7 +200,9 @@ while True:
    
     # print "DEBUG"
     screen.fill(0x000000)
-    Background(Ground,GroundRect)
+    #Background(Ground,GroundRect)
+    Layer(Ground,GroundRect,Background, "1","no")
+    Layer(Ground2,Ground2Rect,Background, "2", "no")
     Layer(Wall,WallRect, Level1, "W")
     Player(Simon, SimonRect, PlayerPos[0], PlayerPos[1])
     Display()
