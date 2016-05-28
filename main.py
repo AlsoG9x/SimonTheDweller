@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, random
 from pygame.locals import *
 
 #Variables
@@ -65,7 +65,7 @@ def Layer(sprite,spriteRect,blueprint,char,col='yes',toCall=WallCollision):
                 xL = 0
                 yL += 32
             
-            if j == char:
+            if (j == char):
                 spriteRect.left = xL
                 spriteRect.top = yL
                 
@@ -73,7 +73,20 @@ def Layer(sprite,spriteRect,blueprint,char,col='yes',toCall=WallCollision):
                     toCall()
 
                 screen.blit(sprite,(xL - CameraPos[0], yL - CameraPos[1]))
-            xL += 32
+            if(j != '\n'):xL += 32
+
+def GenBackground():
+        f = open('BG.txt','w')
+        i = 0 
+
+        while i < 400:
+            if ((i+1)%20 == 0): 
+                f.write('\n')
+            elif (random.randrange(3) == 1): 
+                f.write('2')
+            else:
+                f.write('1')
+            i += 1
 
 def Rotation(WantedDeg,RotationValue):
     if RotationValue != WantedDeg:
@@ -92,52 +105,14 @@ Ground2, Ground2Rect = Spritesheet('images/sprites.png',42,12)
 #The Level 1 Map blueprint: W = Wall, . = nothing
 #The Array must be of BackgroundSize[0]/32 x BackgroundSize[1]/32, here: 20x20
 
-Background = [
-"11121212121212121212"
-"21212122121112121212"
-"12121211121112111211"
-"11121211121112111212"
-"11211121111212212122"
-"12121112111211121112"
-"21112112121211121121"
-"12122111212112121112"
-"11211121112111121121"
-"11121112111121121121"
-"11121111121111211211"
-"11112111211122122221"
-"11212121221121121212"
-"12122122211121212212"
-"12121112121112121221"
-"12121211111212121211"
-"12121221121212211121"
-"11211122111212111211"
-"11211212111211121121"
-"11211121122222112211"
-]
+GenBackground()
+Background = open('BG.txt','r').read()
 
-Level1 = [
-"WWWWWWWWWWWWWWWWWWWW"
-"W.....WW...........W"
-"W....WW............W"
-"W...WW...WWWW......W"
-"W...W.......WW.....W"
-"W...W........W.....W"
-"W...WWWWWW...W.....W"
-"W...........WW.....W"
-"WWWW......WWW......W"
-"W..WWWWWWWW........W"
-"W..................W"
-"W..................W"
-"W...WWWWWWWWWWWWWWWW"
-"W..................W"
-"W..................W"
-"W..................W"
-"WWWWWWWWWWWWW......W"
-"W..................W"
-"W..................W"
-"WWWWWWWWWWWWWWWWWWWW"
-]
+FL1 = open('L1.txt','r')
+Level1 =  FL1.read()
 
+
+#Starting the While Loop ( frame 0 )
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
